@@ -1,0 +1,105 @@
+body{
+  background-color: #F4F4F4;
+  font-family: Arial;
+  font-weight:300;
+  color:#4d4d4d;
+}
+.counties {
+  fill: none;
+}
+
+.states {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+}
+
+.q0-12 { fill:#800000; background-color: #800000;}
+.q1-12 { fill:#aa0000; background-color: #aa0000;}
+.q2-12 { fill:#d40000; background-color: #d40000;}
+.q3-12 { fill:#cc2f4a; background-color: #cc2f4a;}
+.q4-12 { fill:#e27f90; background-color: #e27f90;}
+.q5-12 { fill:#f2b3be; background-color: #f2b3be;}
+.q6-12 { fill:#b9d7ff; background-color: #b9d7ff;}
+.q7-12 { fill:#86b6f2; background-color: #86b6f2;}
+.q8-12 { fill:#4389e3; background-color: #4389e3;}
+.q9-12 { fill:#1666cb; background-color: #1666cb;}
+.q10-12 { fill:#0645b4; background-color: #0645b4;}
+.q11-12 { fill:#002b84; background-color: #002b84;}
+/*colors above taken from: https://commons.wikimedia.org/wiki/File:2012nationwidecountymapshadedbypercentagewon.svg*/
+
+@media (max-width: 1199px){
+  svg{
+    margin-left:0px!important;
+  }
+  .legend{
+      margin-left: -15%!important;
+      margin-right:4%!important;
+    } 
+}
+@media (min-width: 1200px) and (max-width: 1340px){
+  .legend{
+      margin-left: -15%!important;
+      margin-right:4%!important;
+    } 
+}
+@media (min-width: 1341px){
+  .legend{
+      margin-left: -4%!important;
+      margin-right:10%!important;
+    } 
+}
+
+ul{
+  -webkit-padding-start: 0px; 
+}
+.legend{
+  float: right;
+  display:block;
+  border:solid 2px lightgray;
+  margin-top:230px;
+  margin-left:-5%;
+  padding: 10px;
+  margin-right:0%;
+}
+.block{
+  display: block;
+  border: none;
+  margin:10px;
+  height:14px;
+  width: 14px;
+}
+.span4.income{
+  float:left;
+  margin-left:-7px;
+  text-align: center;
+  line-height: 1.4em;
+  margin-top:7.5px;
+}
+.span4.income>ul{
+  margin-bottom:5px;
+  margin-left:20px;
+ }
+.paid{
+  padding-left:10px;
+  padding-right:10px;
+}
+
+.header{
+  text-align: left;
+  margin-left:10%;
+  font-size: 14px;
+  font-weight: 100 !important;
+}
+div.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: 140px;                  
+  height: 30px;                 
+  padding: 5px;             
+  font-size: 10px;     
+  background: #F4F4F4;
+  border: solid lightgray 2px;      
+  border-radius: 1px;           
+  pointer-events: none;         
+} 

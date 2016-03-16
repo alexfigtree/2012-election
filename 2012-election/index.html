@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<head>  
+    <meta charset="utf-8">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+      
+    <link rel="stylesheet" type="text/css" href="/style/style.css">
+      
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script src="/js/d3.v3.min.js"></script>
+    <script src="/js/queue.v1.min.js"></script>
+    <script src="/js/topojson.v1.min.js"></script>
+</head>
+
+<body>
+    <div style="text-align: center;margin-top:40px;margin-bottom: 30px;font-size:20px;"><h2>2012 US Presidential Election: Winner vs income tax paid by county</h2></div>
+    <div style="text-align: center; margin-bottom: -40px;font-size: 20px;font-weight: 100 !important;"><h4>Total income tax paid by each county to the US Government in 2012.</h4></div>
+
+    <div class="legend span12">
+        <div class="span12" style="color:black;">
+            <div class="span4" style="float:left;margin-top:15px;">ROMNEY</div>
+            <div class="span4 paid" style="float:left;text-align: center;line-height: 1.2em;">Income Paid </br>by County:</div>
+            <div class="span4" style="float:right;margin-top:15px;">OBAMA</div>
+        </div>
+        <hr/>
+        <div class="span12">
+            <div class="span4" style="float:left;">
+                <ul><span class="block q5-12"> </ul>
+                <ul><span class="block q4-12"> </ul>
+                <ul><span class="block q3-12"> </ul>
+                <ul><span class="block q2-12"> </ul>
+                <ul><span class="block q1-12"> </ul>
+                <ul><span class="block q0-12"> </ul>
+            </div>
+            <div class="span4 income">
+                <ul>$0 - 156,499</ul>
+                <ul>$156,500 - 311,999</ul>
+                <ul>$312,000 - 466,999</ul>
+                <ul>$467,000 - 624,999</ul>
+                <ul>$625,000 - 774,999</ul>
+                <ul>$775,000 +</ul>
+            </div>
+            <div class="span4" style="float:right;">
+                <ul><span class="block q6-12"></ul>
+                <ul><span class="block q7-12"></ul>
+                <ul><span class="block q8-12"></ul>
+                <ul><span class="block q9-12"></ul>
+                <ul><span class="block q10-12"></ul>
+                <ul><span class="block q11-12"></ul>  
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var width = 960,
+            height = 600;
+        var rateById = d3.map();
+        var domain = [-936386, 0, 936386];
+
+        var quantize = d3.scale.quantize()
+          //.domain([-1000000, 0, 1000000])
+          .domain(domain)
+          .range(d3.range(12).map(function(i) { return "q" + i + "-12"; }));
+        
+        //create map:
+        var projection = d3.geo.albersUsa()
+            .scale(1280)
+            .translate([width / 2, height / 2]);
+        
+        //Create a new geographic path generator with the default settings: the albersUsa projection and a point radius of 4.5 pixels.
+        var path = d3.geo.path()
+            .projection(projection);
+            
+        var div = d3.select("body").append("div")   
+            .attr("class", "tooltip")               
+            .style("opacity", 0);
+            
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .style("margin-left", "5%")
+            .attr("height", height);
+        
+        queue()
+            .defer(d3.json, "/data/us.json")
+            .defer(d3.csv, "/data/FIPS_INCOME_VS_VOTE_March15.csv", function(d) { rateById.set(d.FIPS, +d.Final); rateById.set(d.Final_pos); })
+            .await(ready);
+        
+        function ready(error, us) {
+          if (error) throw error;
+        
+          svg.append("g")
+              .attr("class", "counties")
+            .selectAll("path")
+              .data(topojson.feature(us, us.objects.counties).features)
+            .enter().append("path")
+              .attr("class", function(d) { return quantize(rateById.get(d.id)); })
+              .attr("d", path)
+            //Adding mouseevents
+            .on("mouseover", function(d) {
+              d3.select(this).transition().duration(300).style("opacity", 1);
+              div.transition().duration(300)
+              .style("opacity", 1)
+              div.text("Taxes paid: $" + Math.abs(rateById.get(d.id)))
+              .style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY -30) + "px");
+            })
+            .on("mouseout", function() {
+              d3.select(this)
+              .transition().duration(300)
+              .style("opacity", 0.8);
+              div.transition().duration(300)
+              .style("opacity", 0);
+            });
+        
+          svg.append("path")
+              .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+              .attr("class", "states")
+              .attr("d", path)
+              .attr("c", path);
+        }
+        d3.select(self.frameElement).style("height", height + "px");
+    </script>
+
+    <div class="header"><span style="font-size: 32px;">The map above </span>
+        <span style="font-size:22px;">shows how US counties voted in the 2012 presidential </br>
+        election compared to how much each county paid in federal taxes that year.</div>
+    <div style="margin-left:10%; margin-top:10px;">
+      <p>2012 presidential election results were mapped by county via FIPS code.  Individual income tax returns were
+      </br>summed across AGI sizes for each zip code, then converted to FIPS.</span></p>
+<!--      <p>Open data sources were used to plot election results by county</p>
+      <p>Open data sources were used to plot election results by county</p>-->
+    </div>
+
+    <div class="header" style="margin-top:20px;"><h4>Data Sources:</h4></div>
+    <div class="header">
+        <li><a href="https://www.irs.gov/uac/SOI-Tax-Stats-Individual-Income-Tax-Statistics-2012-ZIP-Code-Data-(SOI)" target="_blank">Income data by county, year 2012</a></li>
+        <li><a href="http://www.theguardian.com/news/datablog/2012/nov/07/us-2012-election-county-results-download#data" target="_blank">Election results - The Guardian </a></li>
+        <li><a href="https://www.google.com/fusiontables/DataSource?docid=1qcQLqrAIAe3RcEfdWSm_QcXMLmteVg4uSpSs1rM#rows:id=1" target="_blank">Election results - Google Fusion tables </a></li>
+    </div>
+    
+    <div class="header" style="margin-top:20px;"><h4>For More Info:</h4></div>
+    <div class="header">
+          <li><a href="https://github.com/alexfigtree/2012-election" target="_blank">Open source project on Github</a></li>
+          <li><a href="https://github.com/alexfigtree/2012-election" target="_blank">Fork this on Github</a></li>
+          <!--<li><a>Tutorial (coming soon)</a></li>-->
+          <!--<li><a>Call to Action: pull an issue ticket and reproduce</a></li>-->
+          
+    </div>    
+    
+    <div class="header" style="margin-top:20px;"><h4>Notes:</h4></div>
+    <div class="header">
+          <li>Map was produced using D3.js, JavaScript, and Python</li>
+          <li>Results for the state of Alaska have been omitted due to limited data</li>
+          <li>Counties in white show missing conversion data between FIPS and zip codes</li>
+          <li>Correlation does not imply causation</li>
+    </div>
+    
+    <div class="header" style="margin-top:20px;margin-bottom:40px;">&copy; 2016 <a href="https://www.alexhiguera.com">Alex Higuera </a>Published Under Creative Attributions License</div>
+
+<!--    <div class="header" style="margin-top:10px;margin-bottom:40px;"><a href="https://www.alexhiguera.com">Made by Alex Higuera</a></div>
+    <div>
+      Have you ever wondered how much Democrats and Republicans compare when it comes to taxes paid?
+    </div>-->
+</body>    
